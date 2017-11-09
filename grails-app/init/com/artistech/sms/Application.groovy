@@ -1,4 +1,4 @@
-package social.media.scraper
+package com.artistech.sms
 
 import grails.boot.GrailsApp
 import grails.boot.config.GrailsAutoConfiguration

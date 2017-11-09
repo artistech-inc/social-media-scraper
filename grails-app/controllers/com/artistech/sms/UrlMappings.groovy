@@ -1,4 +1,4 @@
-package social.media.scraper
+package com.artistech.sms
 
 class UrlMappings {
 
