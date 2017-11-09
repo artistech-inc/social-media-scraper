@@ -3,6 +3,8 @@ package com.artistech.sms
 import grails.gorm.transactions.Transactional
 import groovy.json.JsonSlurper
 
+import java.text.SimpleDateFormat
+
 @Transactional
 class BootStrapService {
 
@@ -14,31 +16,38 @@ class BootStrapService {
         }
         Tweet tweet = new Tweet()
 
+        tweet.contents = map["text"]
         map.each { key, value ->
             if (key != "id" &&
                     key != "user" &&
                     key != "retweeted_status" &&
-                    key != "metadata") {
+                    key != "metadata" &&
+                    key != "created_at") {
                 try {
-                    if(tweet.hasProperty(key)) {
+                    if (tweet.hasProperty(key)) {
                         tweet.setProperty(key, value)
 //                        println tweet.getProperty(key)
                     } else {
-                        if(!key in ["coordinates", "entities"]) {
+                        if (!key in ["coordinates", "entities"]) {
                             println "Add Tweet Property: "
                             println key
                             println value
                         }
                     }
-                } catch(groovy.lang.MissingPropertyException ex) {
+                } catch (groovy.lang.MissingPropertyException ex) {
                     println ex.message
                     println key
                     println value
-                } catch(org.codehaus.groovy.runtime.typehandling.GroovyCastException ex) {
+                } catch (org.codehaus.groovy.runtime.typehandling.GroovyCastException ex) {
                     println ex.message
                     println key
                     println value
                 }
+            } else if(key == "created_at") {
+                //Sun Feb 01 17:43:12 +0000 2009"
+                SimpleDateFormat parser = new SimpleDateFormat("EEE MMM d HH:mm:ss Z yyyy");
+                Date date = parser.parse(value);
+                tweet.created_at = date
             } else if(key == "user") {
                 TweetUser tu = loadUser(value)
                 tweet.user = tu
@@ -67,7 +76,8 @@ class BootStrapService {
             if (key != "id" &&
                     key != "user" &&
                     key != "retweeted_status" &&
-                    key != "metadata") {
+                    key != "metadata" &&
+                    key != "created_at") {
                 try {
                     if (user.hasProperty(key)) {
                         user.setProperty(key, value)
@@ -87,6 +97,11 @@ class BootStrapService {
                     println key
                     println value
                 }
+            } else if(key == "created_at") {
+                //Thu Mar 20 18:34:23 +0000 2014"
+                SimpleDateFormat parser = new SimpleDateFormat("EEE MMM d HH:mm:ss Z yyyy");
+                Date date = parser.parse(value);
+                user.created_at = date
             } else if(key == "user") {
                 TweetUser tu = loadUser(value)
                 //find/create user

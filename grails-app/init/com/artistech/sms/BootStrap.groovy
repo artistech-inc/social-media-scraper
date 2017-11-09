@@ -1,7 +1,5 @@
 package com.artistech.sms
 
-import groovy.json.JsonSlurper
-
 class BootStrap {
 
     def bootStrapService
@@ -13,6 +11,8 @@ class BootStrap {
         if(tweetsFile.exists() && Tweet.count() == 0) {
             bootStrapService.loadFile(tweetsFile)
         }
+        int counter = 1
+        def ret = [];
         println "loaded..."
     }
     def destroy = {

@@ -2,13 +2,12 @@ package com.artistech.sms
 
 class Tweet {
 
-    TweetUser user
+    String contents
+    String id_str
     String contributors
     Boolean truncated
-    String text
     Boolean is_quote_status
     String in_reply_to_status_id
-    String id_str
     String source
     String in_reply_to_screen_name
     String in_reply_to_user_id
@@ -19,12 +18,13 @@ class Tweet {
     String in_reply_to_user_id_str
     Boolean possibly_sensitive
     String lang
-    //use date here?
-    String created_at
+    //use date here?: https://stackoverflow.com/questions/999172/how-to-parse-a-date
+    Date created_at
     String in_reply_to_status_id_str
     String place
     Integer favorite_count
     Boolean retweeted
+    TweetUser user
     //coordinates
     //entities
 
@@ -37,13 +37,14 @@ class Tweet {
 
     static mapping = {
         place type: 'text'
+        contents type: 'text'
     }
 
     static constraints = {
-        user nullable: true
+        user nullable: false
         contributors nullable: true
         truncated nullable: true
-        text nullable: true
+        contents nullable: false
         is_quote_status nullable: true
         in_reply_to_status_id nullable: true
         id_str unique: true

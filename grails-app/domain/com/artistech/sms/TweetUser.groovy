@@ -42,7 +42,7 @@ class TweetUser {
     Boolean is_translator
     Boolean is_protected
     //use date here?
-    String created_at
+    Date created_at
     Integer listed_count
 
     @Override
