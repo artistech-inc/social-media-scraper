@@ -33,7 +33,7 @@ class Tweet {
         return id_str
     }
 
-    static hasMany = [metadata: MetaData, retweets: Tweet]
+    static hasMany = [metadata: MetaData, retweets: Tweet, links: Link]
 
     static mapping = {
         place type: 'text'
@@ -58,7 +58,7 @@ class Tweet {
         in_reply_to_user_id_str nullable: true
         possibly_sensitive nullable: true
         lang nullable: true
-        created_at nullable: true
+        created_at nullable: false
         in_reply_to_status_id_str nullable: true
         place nullable: true
         favorite_count nullable: true

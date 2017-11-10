@@ -16,7 +16,7 @@
 <h1>Tweet Jobs</h1>
 <ul>
     <li>
-        <a href="${createLink(action: 'exec')}">Kick off Search...</a>
+        <a href="${createLink(action: 'exec')}">Kick off Link Extraction...</a>
     </li>
 </ul>
 </body>

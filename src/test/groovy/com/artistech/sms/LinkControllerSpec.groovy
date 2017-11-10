@@ -3,7 +3,7 @@ package com.artistech.sms
 import grails.testing.web.controllers.ControllerUnitTest
 import spock.lang.Specification
 
-class ScrapedControllerSpec extends Specification implements ControllerUnitTest<ScrapedController> {
+class LinkControllerSpec extends Specification implements ControllerUnitTest<LinkController> {
 
     def setup() {
     }

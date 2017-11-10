@@ -8,19 +8,17 @@ class JobThread implements Runnable{
 
     @Override
     void run() {
-        def ids = Tweet.executeQuery( "select id from Tweet" )
+        def originalTweets = Tweet.findAllByRetweeted_status(null)
         Parser p = new Parser()
-        ids.each {
-            Tweet tweet = Tweet.get(it)
-            print tweet.id + ":  "
-            println tweet.contents
-
-            def urls = p.parse(tweet.contents)
+        println "extracting links..."
+        originalTweets.each {
+            Tweet tweet = it
+            def urls = p.parse(it.contents)
+            println it.contents
             urls.each {
-                println it
+                Link link = new Link(tweet:  tweet, url: it).save()
             }
-//            JobProc job = new JobProc(it)
-//            service.submit(job)
         }
+        println "done..."
     }
 }

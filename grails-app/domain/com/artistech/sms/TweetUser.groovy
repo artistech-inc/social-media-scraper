@@ -100,7 +100,7 @@ class TweetUser {
         default_profile_image nullable: true
         is_translator nullable: true
         is_protected nullable: true
-        created_at nullable: true
+        created_at nullable: false
         listed_count nullable: true
     }
 }
