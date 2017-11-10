@@ -50,6 +50,8 @@ class TweetUser {
         return screen_name
     }
 
+    static hasMany = [metadata: MetaData, tweets: Tweet]
+
     static mapping = {
         profile_image_url type: 'text'
         profile_image_url_https type: 'text'
