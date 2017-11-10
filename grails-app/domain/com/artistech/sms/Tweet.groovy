@@ -33,7 +33,7 @@ class Tweet {
         return id_str
     }
 
-    static hasMany = [metadata: MetaData]
+    static hasMany = [metadata: MetaData, retweets: Tweet]
 
     static mapping = {
         place type: 'text'
