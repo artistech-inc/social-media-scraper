@@ -47,7 +47,7 @@ class TweetUser {
 
     @Override
     String toString() {
-        return id_str
+        return screen_name
     }
 
     static mapping = {
@@ -73,12 +73,12 @@ class TweetUser {
         profile_link_color nullable: true
         profile_image_url nullable: true
         notifications nullable: true
-        screen_name nullable: true
+        screen_name unique: true, nullable: false
         favourites_count nullable: true
         profile_background_image_url_https nullable: true
         profile_background_color nullable: true
         profile_banner_url nullable: true
-        id_str unique: true
+        id_str unique: true, nullable: false
         profile_background_image_url nullable: true
         description nullable: true
         lang nullable: true

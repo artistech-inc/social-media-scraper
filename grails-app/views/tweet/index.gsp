@@ -17,7 +17,7 @@
             <g:if test="${flash.message}">
                 <div class="message" role="status">${flash.message}</div>
             </g:if>
-            <f:table collection="${tweetList}" properties="['id_str', 'created_at', 'contents', 'user']" />
+            <f:table collection="${tweetList}" properties="['id_str', 'created_at', 'contents', 'retweeted_status', 'user']" />
 
             <div class="pagination">
                 <g:paginate total="${tweetCount ?: 0}" />
