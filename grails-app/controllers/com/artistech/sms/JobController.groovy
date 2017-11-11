@@ -23,4 +23,13 @@ class JobController {
 
         redirect (action: "index")
     }
+
+    def extractText() {
+        println "extracting...."
+        ScrapeThread jt = new ScrapeThread()
+        jt.service = executorService
+        executorService.submit(jt)
+
+        redirect (action: "index")
+    }
 }
