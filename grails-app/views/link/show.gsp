@@ -18,7 +18,25 @@
             <g:if test="${flash.message}">
             <div class="message" role="status">${flash.message}</div>
             </g:if>
-            <f:display bean="link" />
+            <ol class="property-list link">
+
+                <li class="fieldcontain">
+                    <span id="tweet-label" class="property-label">Tweet</span>
+                    <div class="property-value" aria-labelledby="tweet-label"><a href="${createLink(controller: "tweet", action: "show", id: params.id)}">${tweetid}</a></div>
+                </li>
+
+                <li class="fieldcontain">
+                    <span id="url-label" class="property-label">Url</span>
+                    <div class="property-value" aria-labelledby="url-label"><a href="${url}">${url}</a></div>
+                </li>
+
+                <li class="fieldcontain">
+                    <span id="contents-label" class="property-label">Downloaded</span>
+                    <div class="property-value" aria-labelledby="contents-label">${downloaded}</div>
+                </li>
+
+            </ol>
+                        %{--<f:display bean="link" />--}%
         </div>
     </body>
 </html>
