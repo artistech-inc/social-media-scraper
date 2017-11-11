@@ -28,6 +28,7 @@ repositories {
 dependencies {
     runtime 'mysql:mysql-connector-java:5.1.44'
     compile group: 'org.jsoup', name: 'jsoup', version: '1.10.3'
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
     compile 'org.grails.plugins:grails-executor:0.4'
     compile "org.springframework.boot:spring-boot-starter-logging"
     compile "org.springframework.boot:spring-boot-autoconfigure"

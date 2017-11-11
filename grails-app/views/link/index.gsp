@@ -17,7 +17,7 @@
             <g:if test="${flash.message}">
                 <div class="message" role="status">${flash.message}</div>
             </g:if>
-            <f:table collection="${linkList}" properties="['tweet', 'url']" />
+            <f:table collection="${linkList}" properties="['url', 'tweet']" />
 
             <div class="pagination">
                 <g:paginate total="${linkCount ?: 0}" />

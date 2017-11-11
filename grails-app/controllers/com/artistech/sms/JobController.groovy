@@ -15,4 +15,12 @@ class JobController {
 
         redirect (action: "index")
     }
+
+    def downloadLinks() {
+        DownloadThread jt = new DownloadThread()
+        jt.service = executorService
+        executorService.submit(jt)
+
+        redirect (action: "index")
+    }
 }
