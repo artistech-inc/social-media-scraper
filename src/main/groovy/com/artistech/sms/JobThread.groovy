@@ -1,10 +1,6 @@
 package com.artistech.sms
 
-import java.util.concurrent.ExecutorService
-
 class JobThread implements Runnable{
-
-    ExecutorService service
 
     @Override
     void run() {

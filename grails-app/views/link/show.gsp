@@ -31,6 +31,11 @@
                 </li>
 
                 <li class="fieldcontain">
+                    <span id="resolved-label" class="property-label">Resolved</span>
+                    <div class="property-value" aria-labelledby="resolved-label"><a href="${resolved}">${resolved}</a></div>
+                </li>
+
+                <li class="fieldcontain">
                     <span id="contents-label" class="property-label">Downloaded</span>
                     <div class="property-value" aria-labelledby="contents-label">${downloaded}</div>
                 </li>

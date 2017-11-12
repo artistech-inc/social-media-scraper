@@ -19,8 +19,8 @@ class ScrapeThread implements Runnable {
                     println link.url
                     Document doc = Jsoup.parse(link.contents)
                     String text = doc.body().text()
-                    link.text = text
-                    link.save(flush: true)
+//                    link.text = text
+//                    link.save(flush: true)
                 }
             } catch (Exception ex) {
                 println ex

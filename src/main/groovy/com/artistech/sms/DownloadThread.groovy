@@ -1,12 +1,8 @@
 package com.artistech.sms
 
-import sun.nio.ch.IOUtil
-
-import java.util.concurrent.ExecutorService
 import org.apache.commons.io.IOUtils
 
 class DownloadThread implements Runnable {
-    ExecutorService service
 
     @Override
     void run() {

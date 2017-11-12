@@ -6,6 +6,6 @@ class LinkController {
 
     def show() {
         Link link = Link.get(params.id)
-        respond ([url: link.url, tweetid: link.tweet.id_str, downloaded: link.contents != null])
+        respond ([url: link.url, resolved: link.resolved, tweetid: link.tweet.id_str, downloaded: link.contents != null])
     }
 }

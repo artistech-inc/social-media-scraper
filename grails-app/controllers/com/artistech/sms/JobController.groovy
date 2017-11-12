@@ -10,7 +10,6 @@ class JobController {
 
     def exec() {
         JobThread jt = new JobThread()
-        jt.service = executorService
         executorService.submit(jt)
 
         redirect (action: "index")
@@ -18,18 +17,19 @@ class JobController {
 
     def downloadLinks() {
         DownloadThread jt = new DownloadThread()
-        jt.service = executorService
         executorService.submit(jt)
 
         redirect (action: "index")
     }
 
-    def extractText() {
-        println "extracting...."
-        ScrapeThread jt = new ScrapeThread()
-        jt.service = executorService
+    def resolveLinks() {
+        println "resolving..."
+        ShortenedResolver jt = new ShortenedResolver()
+
+        println "submitted..."
         executorService.submit(jt)
 
-        redirect (action: "index")
+        println "redirecting..."
+        redirect(action: "index")
     }
 }

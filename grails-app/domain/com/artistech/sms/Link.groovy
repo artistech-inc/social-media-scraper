@@ -5,7 +5,7 @@ class Link {
     Tweet tweet
     String url
     String contents
-    String text
+    String resolved
 
     @Override
     String toString() {
@@ -14,13 +14,13 @@ class Link {
 
     static mapping = {
         contents type: 'text'
-        text type: 'text'
+        resolved type: 'text'
     }
 
     static constraints = {
         tweet nullable: false, unique: ['url']
         url nullable: false
         contents nullable: true
-        text nullable: true
+        resolved nullable: true
     }
 }

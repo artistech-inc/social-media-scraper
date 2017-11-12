@@ -18,7 +18,8 @@
     <ul>
         <li><a href="${createLink(action: 'exec')}">Kick off Link Extraction...</a></li>
         <li><a href="${createLink(action: 'downloadLinks')}">Kick off Link Download...</a></li>
-        <li><a href="${createLink(action: 'extractText')}">Kick off Text Extraction...</a></li>
+        <li><a href="${createLink(action: 'resolveLinks')}">Kick off Link Resolve...</a></li>
+        %{--<li><a href="${createLink(action: 'extractText')}">Kick off Text Extraction...</a></li>--}%
     </ul>
 </ul>
 </body>
