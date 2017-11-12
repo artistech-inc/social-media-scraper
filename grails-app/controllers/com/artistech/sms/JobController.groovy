@@ -2,28 +2,28 @@ package com.artistech.sms
 
 class JobController {
 
+    def executorService
+    def linkService
+
     def index() {
 
     }
 
     def exec() {
-        LinkService ls = new LinkService()
-        ls.linkExtractor()
+        linkService.linkExtractor()
 
         redirect (action: "index")
     }
 
     def downloadLinks() {
-        LinkService ls = new LinkService()
-        ls.linkDownloader()
+        linkService.linkDownloader()
 
         redirect (action: "index")
     }
 
     def resolveLinks() {
         println "resolving..."
-        LinkService ls = new LinkService()
-        ls.linkResolver()
+        linkService.linkResolver()
 
         println "redirecting..."
         redirect(action: "index")

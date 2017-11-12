@@ -2,41 +2,84 @@ package com.artistech.sms
 
 import grails.gorm.transactions.Transactional
 import org.apache.commons.io.IOUtils
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
+import java.util.concurrent.atomic.AtomicInteger
 
 @Transactional
 class LinkService {
+    def executorService
 
     def linkResolver() {
         runAsync {
             println "resolving links..."
             def ids = Link.executeQuery("select id from Link where resolved is null");
+            AtomicInteger counter = new AtomicInteger(0);
             try {
+                def map = Collections.synchronizedMap(new HashMap());
                 ids.each {
-                    Link link = Link.get(it)
-                    try {
-                        print link.id + ": "
-                        println link.url
-                        HttpURLConnection connection = (HttpURLConnection) new URL(link.url).openConnection()
-                        connection.setInstanceFollowRedirects(false)
-                        String location = link.url
-                        def redirectedTo = []
-                        while (!redirectedTo.contains(location) &&
-                                connection.responseCode >= 300 && connection.responseCode < 400) {
-                            redirectedTo.add(location)
-                            location = connection.getHeaderField("location")
-                            println location
-                            connection = (HttpURLConnection) new URL(location).openConnection()
-                            connection.setInstanceFollowRedirects(false)
+                    Runnable r = new Runnable() {
+
+                        Link link = Link.get(it)
+
+                        @Override
+                        void run() {
+                            try {
+                                HttpURLConnection connection = (HttpURLConnection) new URL(link.url).openConnection()
+                                connection.setInstanceFollowRedirects(false)
+                                String location = link.url
+                                def redirectedTo = []
+                                while (!redirectedTo.contains(location) &&
+                                        connection.responseCode >= 300 && connection.responseCode < 400) {
+                                    redirectedTo.add(location)
+                                    location = connection.getHeaderField("location")
+                                    connection = (HttpURLConnection) new URL(location).openConnection()
+                                    connection.setInstanceFollowRedirects(false)
+                                }
+                                map[it] = location
+                                println "Setting [" + it + "] - " + map[it]
+                            } catch (java.net.MalformedURLException ex) {
+                            } catch (javax.net.ssl.SSLHandshakeException ex) {
+                            } catch (javax.net.ssl.SSLProtocolException ex) {
+                            } catch (java.net.UnknownHostException ex) {
+                            } catch (java.net.NoRouteToHostException ex){
+                            } catch (java.net.ConnectException ex) {
+                            } catch (Exception ex) {
+                                ex.printStackTrace()
+                            } finally {
+                                counter.incrementAndGet()
+                            }
                         }
-                        link.resolved = location
-                        link.save(flush: true)
-                        println link.resolved
+                    }
+                    executorService.submit(r)
+                }
+
+                while(counter.get() != ids.size()) {
+                    try {
+                        def map2 = new HashMap(map)
+                        def toRemove = []
+
+                        map2.each { key, value ->
+                            toRemove.add(key)
+
+                            Link link = Link.get(key)
+                            link.resolved = value
+                            println "Saving: [" + link.id + "] - " + link.resolved
+                            link.save(flush: true)
+                        }
+                        toRemove.each {
+                            map.remove(it)
+                        }
                     } catch (Exception ex) {
                         ex.printStackTrace()
                     }
                 }
+
+                map.each { key, value ->
+                    Link link = Link.get(key)
+                    link.resolved = value
+                    println "Saving: [" + link.id + "] - " + link.resolved
+                    link.save(flush: true)
+                }
+
             }
             catch (Exception ex) {
                 ex.printStackTrace()
@@ -45,63 +88,67 @@ class LinkService {
         }
     }
 
-    def linkExtractor() {
-        runAsync {
-            def originalTweets = Tweet.findAllByRetweeted_status(null)
-            Parser p = new Parser()
-            println "extracting links..."
-            originalTweets.each {
-                Tweet tweet = it
-                def urls = p.parse(it.contents)
-                println it.contents
-                urls.each {
-                    Link link = new Link(tweet: tweet, url: it).save()
-                }
+    def linkResolver(Link link) {
+        try {
+            HttpURLConnection connection = (HttpURLConnection) new URL(link.url).openConnection()
+            connection.setInstanceFollowRedirects(false)
+            String location = link.url
+            def redirectedTo = []
+            while (!redirectedTo.contains(location) &&
+                    connection.responseCode >= 300 && connection.responseCode < 400) {
+                redirectedTo.add(location)
+                location = connection.getHeaderField("location")
+                connection = (HttpURLConnection) new URL(location).openConnection()
+                connection.setInstanceFollowRedirects(false)
             }
-        }
-        println "done..."
-    }
-
-    def linkDownloader() {
-        runAsync {
-            def links = Link.findAllByContents(null)
-            println "downloading links..."
-            links.each {
-                try {
-                    URL url = new URL(it.url)
-                    InputStream is = url.openStream()
-                    it.contents = IOUtils.toString(is, "UTF-8")
-                    it.save(flush: true)
-                    print "Saved: "
-                    println it.url
-                    is.close()
-                } catch (Exception ex) {
-                    println ex
-                }
-            }
-            println "done..."
+            link.resolved = location
+            println "Saving: [" + link.id + "] - " + link.resolved
+            link.save(flush: true)
+        } catch (java.net.MalformedURLException ex) {
+        } catch (javax.net.ssl.SSLHandshakeException ex) {
+        } catch (javax.net.ssl.SSLProtocolException ex) {
+        } catch (java.net.UnknownHostException ex) {
+        } catch (java.net.NoRouteToHostException ex){
+        } catch (java.net.ConnectException ex) {
+        } catch (Exception ex) {
+            ex.printStackTrace()
+        } finally {
         }
     }
 
-    def linkScraper() {
-        runAsync {
-            println "scraping HTML..."
-            def ids = Link.executeQuery( "select id from Link" );
-            ids.each {
-                Link link = Link.get(it)
-                try {
-                    if(link.contents != null && link.text == null) {
-                        println link.url
-                        Document doc = Jsoup.parse(link.contents)
-                        String text = doc.body().text()
-//                    link.text = text
-//                    link.save(flush: true)
-                    }
-                } catch (Exception ex) {
-                    println ex
-                }
-            }
-            println "done..."
+    def linkDownloader(Link link) {
+        try {
+            URL url = new URL(link.url)
+            InputStream is = url.openStream()
+            link.contents = IOUtils.toString(is, "UTF-8")
+            link.save(flush: true)
+            print "Saved: "
+            println link.url
+            is.close()
+        } catch (Exception ex) {
+            println ex
         }
     }
+
+//    def linkScraper() {
+//        runAsync {
+//            println "scraping HTML..."
+//            def ids = Link.executeQuery( "select id from Link" );
+//            ids.each {
+//                Link link = Link.get(it)
+//                try {
+//                    if(link.contents != null && link.text == null) {
+//                        println link.url
+//                        Document doc = Jsoup.parse(link.contents)
+//                        String text = doc.body().text()
+////                    link.text = text
+////                    link.save(flush: true)
+//                    }
+//                } catch (Exception ex) {
+//                    println ex
+//                }
+//            }
+//            println "done..."
+//        }
+//    }
 }

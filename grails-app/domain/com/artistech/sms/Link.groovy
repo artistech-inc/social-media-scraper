@@ -2,6 +2,8 @@ package com.artistech.sms
 
 class Link {
 
+    def linkService
+
     Tweet tweet
     String url
     String contents
@@ -22,5 +24,12 @@ class Link {
         url nullable: false
         contents nullable: true
         resolved nullable: true
+    }
+
+    def afterInsert(){
+        runAsync {
+            linkService.linkDownloader(this)
+            linkService.linkResolver(this)
+        }
     }
 }

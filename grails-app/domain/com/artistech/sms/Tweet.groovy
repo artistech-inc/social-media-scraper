@@ -2,6 +2,8 @@ package com.artistech.sms
 
 class Tweet {
 
+    def tweetService
+
     String contents
     String id_str
     String contributors
@@ -63,5 +65,13 @@ class Tweet {
         place nullable: true
         favorite_count nullable: true
         retweeted nullable: true
+    }
+
+    def afterInsert(){
+        runAsync {
+            tweetService.linkExtractor(this)
+//            linkService.linkDownloader()
+//            linkService.linkResolver()
+        }
     }
 }
