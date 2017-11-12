@@ -2,32 +2,28 @@ package com.artistech.sms
 
 class JobController {
 
-    def executorService
-
     def index() {
 
     }
 
     def exec() {
-        JobThread jt = new JobThread()
-        executorService.submit(jt)
+        LinkService ls = new LinkService()
+        ls.linkExtractor()
 
         redirect (action: "index")
     }
 
     def downloadLinks() {
-        DownloadThread jt = new DownloadThread()
-        executorService.submit(jt)
+        LinkService ls = new LinkService()
+        ls.linkDownloader()
 
         redirect (action: "index")
     }
 
     def resolveLinks() {
         println "resolving..."
-        ShortenedResolver jt = new ShortenedResolver()
-
-        println "submitted..."
-        executorService.submit(jt)
+        LinkService ls = new LinkService()
+        ls.linkResolver()
 
         println "redirecting..."
         redirect(action: "index")
