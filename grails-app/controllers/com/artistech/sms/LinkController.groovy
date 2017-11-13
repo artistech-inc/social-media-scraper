@@ -16,6 +16,6 @@ class LinkController {
         Link link = Link.get(params.id)
         Document doc = Jsoup.parse(link.contents)
         String contents = doc.body().text()
-        respond ([url: link.url, resolved: link.resolved, tweetid: link.tweet.id_str, contents: contents])
+        respond ([url: link.url, resolved: link.resolved, tweetid: link.tweet.id_str, tweetdbid: link.tweet.id, contents: contents])
     }
 }
