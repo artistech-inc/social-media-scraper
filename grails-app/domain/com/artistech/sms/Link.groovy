@@ -17,6 +17,7 @@ class Link {
     static mapping = {
         contents type: 'text'
         resolved type: 'text'
+        autowire true
     }
 
     static constraints = {
@@ -26,10 +27,9 @@ class Link {
         resolved nullable: true
     }
 
-    def afterInsert(){
-        runAsync {
-            linkService.linkDownloader(this)
-            linkService.linkResolver(this)
-        }
+    def beforeInsert(){
+        linkService.linkData(this)
+//        this.resolved = linkService.linkResolver(this)
+//        this.contents = linkService.linkDownloader(this)
     }
 }

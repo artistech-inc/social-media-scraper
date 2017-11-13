@@ -2,6 +2,7 @@ package com.artistech.sms
 
 import grails.gorm.transactions.Transactional
 import groovy.json.JsonSlurper
+import org.apache.commons.io.IOUtils
 
 import java.text.SimpleDateFormat
 
@@ -60,7 +61,7 @@ class BootStrapService {
                 //create metadata
             }
         }
-        tweet.save(failOnError: true)
+        tweet.save(failOnError: true, flush: true)
         return tweet
     }
 
@@ -111,13 +112,19 @@ class BootStrapService {
                 //create metadata
             }
         }
-        user.save(failOnError: true)
+        user.save(failOnError: true, flush: true)
         return user
     }
 
-    def loadFile(File file) {
+    def loadFile(TweetCommand cmd) {
+        def is = cmd.tweetJsonFile.inputStream
+        StringWriter writer = new StringWriter();
+        IOUtils.copy(is, writer, "UTF-8");
+        String theString = writer.toString();
+        String[] file = theString.split(System.lineSeparator());
+
         JsonSlurper slurper = new JsonSlurper();
-        file.eachLine( {
+        file.each( {
             def map = slurper.parseText(it)
             loadTweet(map)
         })

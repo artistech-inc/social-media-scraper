@@ -36,13 +36,8 @@
                 </li>
 
                 <li class="fieldcontain">
-                    <span id="contents-label" class="property-label">Downloaded</span>
-                    <g:if test="${downloaded}">
-                        <div class="property-value" aria-labelledby="contents-label"><a href="${createLink(action: "contents", id: params.id)}">${downloaded}</a></div>
-                    </g:if>
-                    <g:else>
-                        <div class="property-value" aria-labelledby="contents-label">${downloaded}</div>
-                    </g:else>
+                    <span id="contents-label" class="property-label">Contents</span>
+                    <div class="property-value" aria-labelledby="contents-label">${contents}</div>
                 </li>
 
             </ol>

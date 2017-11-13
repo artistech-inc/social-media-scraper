@@ -2,6 +2,7 @@ package com.artistech.sms
 
 class Tweet {
 
+    def executorService
     def tweetService
 
     String contents
@@ -20,7 +21,6 @@ class Tweet {
     String in_reply_to_user_id_str
     Boolean possibly_sensitive
     String lang
-    //use date here?: https://stackoverflow.com/questions/999172/how-to-parse-a-date
     Date created_at
     String in_reply_to_status_id_str
     String place
@@ -40,6 +40,7 @@ class Tweet {
     static mapping = {
         place type: 'text'
         contents type: 'text'
+        autowire true
     }
 
     static constraints = {
@@ -68,10 +69,14 @@ class Tweet {
     }
 
     def afterInsert(){
-        runAsync {
-            tweetService.linkExtractor(this)
-//            linkService.linkDownloader()
-//            linkService.linkResolver()
+        if(this.retweeted_status == null) {
+            println "inserted original: " + this.id
+            final Tweet tw = this
+            executorService.submit( {
+                Link.withNewSession {
+                    tweetService.linkExtractor(tw)
+                }
+            })
         }
     }
 }

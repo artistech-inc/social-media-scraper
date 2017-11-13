@@ -6,6 +6,6 @@ beans = {
     executorService(PersistenceContextExecutorWrapper) { bean ->
         bean.destroyMethod = 'destroy'
         persistenceInterceptor = ref("persistenceInterceptor")
-        executor = Executors.newFixedThreadPool(15)
+        executor = Executors.newFixedThreadPool(25)
     }
 }

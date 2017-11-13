@@ -6,14 +6,7 @@ class BootStrap {
 
     def init = { servletContext ->
 
-        def tweetsFile = new File('/work/tweets.json')
-        println "loading..."
-        if(tweetsFile.exists() && Tweet.count() == 0) {
-            bootStrapService.loadFile(tweetsFile)
-        }
-        int counter = 1
-        def ret = [];
-        println "loaded..."
+
 
 //        ContentTable ct = new ContentTable("jdbc:mysql://lespaul:3306/smsProd?autoReconnect=true&useSSL=false", "sms", "sms", "com.mysql.jdbc.Driver")
 //        ct.getIds("select id from search_file", { id ->
