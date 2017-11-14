@@ -3,7 +3,9 @@ package com.artistech.sms
 import org.springframework.web.multipart.MultipartFile
 
 class TweetController {
+
     def bootStrapService
+    def executorService
 
     static scaffold = Tweet
 
@@ -19,7 +21,7 @@ class TweetController {
             return
         }
 
-        runAsync {
+        executorService.submit {
             bootStrapService.loadFile(cmd)
         }
 

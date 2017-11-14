@@ -15,7 +15,7 @@ class TweetCommand implements Validateable {
                 return false
             }
 
-            ['json'].any { extension ->
+            ['.json', '.tar.gz'].any { extension ->
                 val.originalFilename?.toLowerCase()?.endsWith(extension)
             }
         }

@@ -2,7 +2,8 @@ package com.artistech.sms
 
 import grails.gorm.transactions.Transactional
 import groovy.json.JsonSlurper
-import org.apache.commons.io.IOUtils
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
 
 import java.text.SimpleDateFormat
 
@@ -115,18 +116,63 @@ class BootStrapService {
         user.save(failOnError: true, flush: true)
         return user
     }
-
+    final static int BUFFER = 2048;
     def loadFile(TweetCommand cmd) {
-        def is = cmd.tweetJsonFile.inputStream
-        StringWriter writer = new StringWriter();
-        IOUtils.copy(is, writer, "UTF-8");
-        String theString = writer.toString();
-        String[] file = theString.split(System.lineSeparator());
+        String fileName = cmd.tweetJsonFile.originalFilename.toLowerCase()
+        if(fileName.endsWith(".json")) {
+            def is = cmd.tweetJsonFile.inputStream
+            InputStreamReader sr = new InputStreamReader(is)
+            String str = sr.readLine()
+            JsonSlurper slurper = new JsonSlurper();
+            while(str != null) {
+                def map = slurper.parseText(str)
+                loadTweet(map)
+                println str
+                str = sr.readLine()
+            }
+        } else if (fileName.endsWith(".tar.gz")) {
+            def is = cmd.tweetJsonFile.inputStream
+            BufferedInputStream bin = new BufferedInputStream(is)
+            GzipCompressorInputStream gzIn = new GzipCompressorInputStream(bin)
+            TarArchiveInputStream tarIn = new TarArchiveInputStream(gzIn)
+            println "coming soon..."
 
-        JsonSlurper slurper = new JsonSlurper();
-        file.each( {
-            def map = slurper.parseText(it)
-            loadTweet(map)
-        })
+
+//            TarArchiveEntry entry = null;
+//
+//            /** Read the tar entries using the getNextEntry method **/
+//
+//            while ((entry = (TarArchiveEntry) tarIn.getNextEntry()) != null) {
+//
+//                println "Extracting: " + entry.getName()
+//
+//                /** If the entry is a directory, create the directory. **/
+//
+//                if (entry.isDirectory()) {
+//                }
+//                /**
+//                 * If the entry is a file,write the decompressed file to the disk
+//                 * and close destination stream.
+//                 **/
+//                else {
+//                    int count;
+//                    byte[] data = new byte[BUFFER];
+////
+////                    FileOutputStream fos = new FileOutputStream(args[1]
+////                            + entry.getName());
+////                    BufferedOutputStream dest = new BufferedOutputStream(fos,
+////                            BUFFER);
+////                    while ((count = tarIn.read(data, 0, BUFFER)) != -1) {
+////                        dest.write(data, 0, count);
+////                    }
+////                    dest.close();
+//                }
+//            }
+
+            /** Close the input stream **/
+
+            tarIn.close();
+
+        }
     }
 }
