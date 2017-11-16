@@ -44,6 +44,7 @@ class Tweet {
     }
 
     static constraints = {
+        links cascade: 'all-delete-orphan'
         user nullable: false
         contributors nullable: true
         truncated nullable: true
@@ -77,6 +78,11 @@ class Tweet {
                     tweetService.linkExtractor(tw)
                 }
             })
+        }
+
+        if(!this.user.tweets.find{ it.id == this.id }) {
+            this.user.addToTweets(this)
+            this.user.save()
         }
     }
 }

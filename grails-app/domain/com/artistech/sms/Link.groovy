@@ -29,7 +29,12 @@ class Link {
 
     def beforeInsert(){
         linkService.linkData(this)
-//        this.resolved = linkService.linkResolver(this)
-//        this.contents = linkService.linkDownloader(this)
+    }
+
+    def afterInsert() {
+        if(!this.tweet.links.find{ it.id == this.id }) {
+            this.tweet.addToLinks(this)
+            this.tweet.save()
+        }
     }
 }

@@ -166,16 +166,6 @@ class BootStrapService {
                         println str
                         str = sr.readLine()
                     }
-//                    byte[] data = new byte[BUFFER];
-//
-//                    FileOutputStream fos = new FileOutputStream(args[1]
-//                            + entry.getName());
-//                    BufferedOutputStream dest = new BufferedOutputStream(fos,
-//                            BUFFER);
-//                    while ((count = tarIn.read(data, 0, BUFFER)) != -1) {
-//                        dest.write(data, 0, count);
-//                    }
-//                    dest.close();
                 }
             }
 

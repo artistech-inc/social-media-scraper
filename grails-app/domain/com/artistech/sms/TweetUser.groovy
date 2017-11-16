@@ -63,6 +63,8 @@ class TweetUser {
     }
 
     static constraints = {
+        tweets cascade: 'all-delete-orphan'
+
         translator_type nullable: true
         is_translation_enabled nullable: true
         utc_offset nullable: true

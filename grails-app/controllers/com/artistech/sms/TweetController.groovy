@@ -1,7 +1,5 @@
 package com.artistech.sms
 
-import org.springframework.web.multipart.MultipartFile
-
 class TweetController {
 
     def bootStrapService
@@ -11,7 +9,7 @@ class TweetController {
 
     def upload(TweetCommand cmd) {
         if (cmd == null) {
-            notFound()
+            redirect view: 'index'
             return
         }
 
