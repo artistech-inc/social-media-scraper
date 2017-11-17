@@ -18,7 +18,7 @@ info:
         grailsVersion: '@info.app.grailsVersion@'
 spring:
     main:
-        banner-mode: "off"
+        banner-mode: "console"
     groovy:
         template:
             check-template-location: false
@@ -111,7 +111,29 @@ environments:
     development:
         dataSource:
             dbCreate: update
-            url: jdbc:h2:mem:devDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+            driverClassName: com.mysql.jdbc.Driver
+            dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+            username: sms
+            password: 'sms'
+            url: jdbc:mysql://lespaul:3306/smsDev?autoReconnect=true&useSSL=false
+            properties:
+                jmxEnabled: true
+                initialSize: 5
+                maxActive: 50
+                minIdle: 5
+                maxIdle: 25
+                maxWait: 10000
+                maxAge: 600000
+                timeBetweenEvictionRunsMillis: 5000
+                minEvictableIdleTimeMillis: 60000
+                validationQuery: SELECT 1
+                validationQueryTimeout: 3
+                validationInterval: 15000
+                testOnBorrow: true
+                testWhileIdle: true
+                testOnReturn: false
+                jdbcInterceptors: ConnectionState
+                defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
     test:
         dataSource:
             dbCreate: update
@@ -123,7 +145,7 @@ environments:
             dialect: org.hibernate.dialect.MySQL5InnoDBDialect
             username: sms
             password: 'sms'
-            url: jdbc:mysql://localhost:3306/smsProd?autoReconnect=true&useSSL=false
+            url: jdbc:mysql://localhost:3306/smsDev?autoReconnect=true&useSSL=false
             properties:
                 jmxEnabled: true
                 initialSize: 5

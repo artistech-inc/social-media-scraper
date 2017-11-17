@@ -22,7 +22,7 @@
 
                 <li class="fieldcontain">
                     <span id="tweet-label" class="property-label">Tweet</span>
-                    <div class="property-value" aria-labelledby="tweet-label"><a href="${createLink(controller: "tweet", action: "show", id: params.id)}">${tweetid}</a></div>
+                    <div class="property-value" aria-labelledby="tweet-label"><a href="${createLink(controller: "tweet", action: "show", id: tweetdbid)}">${tweetid}</a></div>
                 </li>
 
                 <li class="fieldcontain">
