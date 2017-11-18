@@ -37,6 +37,6 @@ class TweetController {
         int offset = params.offset == null ? 0 : params.offset
         int max = params.max == null ? 10 : params.max
         def list = Tweet.getAll()
-        [tweetList: Tweet.list(offset: offset, max: max), tweetTotal: Tweet.count()]
+        [tweetList: Tweet.list(offset: offset, max: max), tweetCount: Tweet.count()]
     }
 }
