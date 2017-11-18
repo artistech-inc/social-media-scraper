@@ -26,7 +26,15 @@ class TweetController {
         redirect action: "index"
     }
 
-    def create() {
-
+    def index() {
+        if(request.post) {
+            //this is a REST call to insert a JSON string
+            String tweet = request.reader.text
+            bootStrapService.loadTweet(tweet)
+            render "OK"
+            return
+        }
+        //it's anything else
+        [tweetList: Tweet.list(), tweetTotal: Tweet.count()]
     }
 }

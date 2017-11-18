@@ -118,6 +118,14 @@ class BootStrapService {
         user.save(failOnError: true, flush: true)
         return user
     }
+
+    def loadTweet(String tweet) {
+        JsonSlurper slurper = new JsonSlurper();
+        println tweet
+        def map = slurper.parseText(tweet)
+        loadTweet(map)
+    }
+
 //    final static int BUFFER = 2048;
     def loadFile(TweetCommand cmd) {
         String fileName = cmd.tweetJsonFile.originalFilename.toLowerCase()
