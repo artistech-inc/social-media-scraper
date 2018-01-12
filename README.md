@@ -15,7 +15,7 @@ The [my.ini](my.ini) file belongs in `c:\ProgramData\MySQL\MySQL Server 5.7\`.  
 
 ### Linux (Ubuntu)
 
-The [mysql.cnf](mysql.cnf) file belongs in `/etc/mysql/mysql.conf.d` directory.  This assumes that the `/etc/mysql/my.cnf` files contains the following line: `!includedir /etc/mysql/mysql.conf.d/`
+The [mysqld.cnf](mysqld.cnf) file belongs in `/etc/mysql/mysql.conf.d` directory.  This assumes that the `/etc/mysql/my.cnf` files contains the following line: `!includedir /etc/mysql/mysql.conf.d/`
 
 ### Creating the Database
 
