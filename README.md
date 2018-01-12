@@ -11,11 +11,11 @@ Development is usually done using h2 for speed, but production is based on MySQL
 
 ### Windows
 
-The [my.ini](blob/master/my.ini) file belongs in `c:\ProgramData\MySQL\MySQL Server 5.7\`.  Note, this is not the `Program Files` directory.  It is hidden from view and must be accessed specifically.
+The [my.ini](my.ini) file belongs in `c:\ProgramData\MySQL\MySQL Server 5.7\`.  Note, this is not the `Program Files` directory.  It is hidden from view and must be accessed specifically.
 
 ### Linux (Ubuntu)
 
-The [mysql.cnf](blob/master/mysql.cnf) file belongs in `/etc/mysql/mysql.conf.d` directory.  This assumes that the `/etc/mysql/my.cnf` files contains the following line: `!includedir /etc/mysql/mysql.conf.d/`
+The [mysql.cnf](mysql.cnf) file belongs in `/etc/mysql/mysql.conf.d` directory.  This assumes that the `/etc/mysql/my.cnf` files contains the following line: `!includedir /etc/mysql/mysql.conf.d/`
 
 ### Creating the Database
 
