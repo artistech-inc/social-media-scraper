@@ -10,7 +10,7 @@ buildscript {
     }
 }
 
-version "0.9"
+version "0.9.1"
 group "com.artistech"
 
 apply plugin:"eclipse"

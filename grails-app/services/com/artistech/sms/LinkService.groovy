@@ -2,7 +2,6 @@ package com.artistech.sms
 
 import grails.gorm.transactions.Transactional
 import org.apache.commons.io.IOUtils
-//import java.util.concurrent.atomic.AtomicInteger
 
 @Transactional
 class LinkService {
@@ -11,27 +10,32 @@ class LinkService {
         System.setProperty("http.agent", "")
         try {
             String userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36"
-            HttpURLConnection connection = (HttpURLConnection) new URL(link.url).openConnection()
-//            connection.setRequestProperty("User-Agent", userAgent);
+            HttpURLConnection connection
 
-            connection.setInstanceFollowRedirects(false)
-            println "resolving: " + link.url
-            String location = link.url
-            def redirectedTo = []
-            //redirect
-            while (!redirectedTo.contains(location) &&
-                    connection.responseCode >= 300 && connection.responseCode < 400) {
-                redirectedTo.add(location)
-                location = connection.getHeaderField("location")
-                connection.disconnect()
-                connection = (HttpURLConnection) new URL(location).openConnection()
-//                connection.setRequestProperty("User-Agent", userAgent);
+            //if the url has been specified as resloved, don't resolve again.
+            if(link.resolved == null) {
+                connection = (HttpURLConnection) new URL(link.url).openConnection()
+                connection.setRequestProperty("User-Agent", userAgent);
+
                 connection.setInstanceFollowRedirects(false)
+                String location = link.url
+                def redirectedTo = []
+                //redirect
+                while (!redirectedTo.contains(location) &&
+                        connection.responseCode >= 300 && connection.responseCode < 400) {
+                    redirectedTo.add(location)
+                    location = connection.getHeaderField("location")
+                    connection.disconnect()
+                    connection = (HttpURLConnection) new URL(location).openConnection()
+                    connection.setRequestProperty("User-Agent", userAgent);
+                    connection.setInstanceFollowRedirects(false)
+                }
+                link.resolved = location
+                println "resolved [" + link.id + "]: " + link.url + " to " + link.resolved
+                connection.disconnect()
             }
-            link.resolved = location
-            println "resolved: " + link.resolved
-            connection.disconnect()
 
+            //download data, spoof user-agent to gain access to all HTML
             connection = (HttpURLConnection) new URL(link.resolved).openConnection()
             connection.setRequestProperty("User-Agent", userAgent);
 
@@ -42,7 +46,7 @@ class LinkService {
                 is.close()
 
                 link.contents = contents
-                println "downloaded: " + contents.length()
+                println "downloaded [" + link.id + "]: " + link.resolved + " (" + contents.length() + ")"
             }
             connection.disconnect()
         } catch (java.io.IOException ex) {

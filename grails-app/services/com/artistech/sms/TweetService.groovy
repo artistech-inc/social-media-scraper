@@ -9,8 +9,8 @@ class TweetService {
         Parser p = new Parser()
         def urls = p.parse(tweet.contents)
         urls.each {
-            Link link = new Link(tweet: tweet, url: it)//.save(flush: true)
-            println link.save(flush: true)
+            Link link = new Link(tweet: tweet, url: it)
+            link.save(flush: true)
         }
     }
 

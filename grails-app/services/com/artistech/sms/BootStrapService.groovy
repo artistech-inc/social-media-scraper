@@ -19,6 +19,7 @@ class BootStrapService {
             return existing
         }
         Tweet tweet = new Tweet()
+        def links = []
 
         tweet.contents = map["text"]
         map.each { key, value ->
@@ -26,7 +27,8 @@ class BootStrapService {
                     key != "user" &&
                     key != "retweeted_status" &&
                     key != "metadata" &&
-                    key != "created_at") {
+                    key != "created_at" &&
+                    key != "entities") {
                 try {
                     if (tweet.hasProperty(key)) {
                         tweet.setProperty(key, value)
@@ -62,9 +64,20 @@ class BootStrapService {
                 //find/create tweet
             } else if (key == "metadata") {
                 //create metadata
+            } else if (key == "entities") {
+                //load data into map
+                map[key]["urls"].each {
+                    Link link = new Link()
+                    link.url = it["url"]
+                    link.tweet = tweet
+                    links.add(link)
+                }
             }
         }
         tweet.save(failOnError: true, flush: true)
+        links.each {
+            it.save(failOnError: true, flush: true)
+        }
         return tweet
     }
 
