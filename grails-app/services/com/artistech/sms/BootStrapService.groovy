@@ -5,12 +5,15 @@ import groovy.json.JsonSlurper
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
-import org.apache.commons.io.IOUtils
+import org.grails.core.util.StopWatch
 
 import java.text.SimpleDateFormat
 
 @Transactional
 class BootStrapService {
+
+    def executorService
+    def mailService
 
     def loadTweet(Map map) {
         String id_str = map["id_str"]
@@ -142,10 +145,25 @@ class BootStrapService {
         loadTweet(map)
     }
 
-//    final static int BUFFER = 2048;
     def loadFile(TweetCommand cmd) {
+        StopWatch sw = new StopWatch()
+        sw.start()
         String fileName = cmd.tweetJsonFile.originalFilename.toLowerCase()
+
+        String emailAddress = cmd.emailAddress
+
+        if(mailService != null) {
+            executorService.submit({
+                mailService.sendMail {
+                    to emailAddress
+                    subject "Import Start"
+                    body 'Import Start'
+                }
+            })
+        }
+
         if(fileName.endsWith(".json")) {
+            println "Reading: " + cmd.tweetJsonFile.originalFilename
             def is = cmd.tweetJsonFile.inputStream
             InputStreamReader sr = new InputStreamReader(is)
             String str = sr.readLine()
@@ -153,15 +171,15 @@ class BootStrapService {
             while(str != null) {
                 def map = slurper.parseText(str)
                 loadTweet(map)
-//                println str
                 str = sr.readLine()
             }
+
+            println "done reading input file!"
         } else if (fileName.endsWith(".tar.gz")) {
             def is = cmd.tweetJsonFile.inputStream
             BufferedInputStream bin = new BufferedInputStream(is)
             GzipCompressorInputStream gzIn = new GzipCompressorInputStream(bin)
             TarArchiveInputStream tarIn = new TarArchiveInputStream(gzIn)
-//            println "coming soon..."
 
             TarArchiveEntry entry = null;
 
@@ -187,7 +205,6 @@ class BootStrapService {
                     while(str != null) {
                         def map = slurper.parseText(str)
                         loadTweet(map)
-//                        println str
                         str = sr.readLine()
                     }
                 }
@@ -197,7 +214,17 @@ class BootStrapService {
 
             tarIn.close();
             println "done reading input file!"
+        }
 
+        sw.stop()
+        if(mailService != null) {
+            executorService.submit({
+                sendMail {
+                    to emailAddress
+                    subject "Import Complete"
+                    body 'Import Complete: ' + sw.toString()
+                }
+            })
         }
     }
 }
