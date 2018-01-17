@@ -15,7 +15,7 @@ class LinkService {
             //if the url has been specified as resloved, don't resolve again.
             if(link.resolved == null) {
                 connection = (HttpURLConnection) new URL(link.url).openConnection()
-                connection.setRequestProperty("User-Agent", userAgent);
+                connection.setRequestProperty("User-Agent", "");
 
                 connection.setInstanceFollowRedirects(false)
                 String location = link.url
@@ -27,7 +27,7 @@ class LinkService {
                     location = connection.getHeaderField("location")
                     connection.disconnect()
                     connection = (HttpURLConnection) new URL(location).openConnection()
-                    connection.setRequestProperty("User-Agent", userAgent);
+                    connection.setRequestProperty("User-Agent", "");
                     connection.setInstanceFollowRedirects(false)
                 }
                 link.resolved = location

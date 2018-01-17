@@ -111,7 +111,7 @@ environments:
     development:
         dataSource:
             dbCreate: create-drop
-            driverClassName: com.mysql.jdbc.Driver
+            driverClassName: com.mysql.cj.jdbc.Driver
             dialect: org.hibernate.dialect.MySQL5InnoDBDialect
             username: sms
             password: 'sms'
@@ -141,7 +141,7 @@ environments:
     production:
         dataSource:
             dbCreate: update
-            driverClassName: com.mysql.jdbc.Driver
+            driverClassName: com.mysql.cj.jdbc.Driver
             dialect: org.hibernate.dialect.MySQL5InnoDBDialect
             username: sms
             password: 'sms'
