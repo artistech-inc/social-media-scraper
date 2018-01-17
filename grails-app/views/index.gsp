@@ -3,8 +3,6 @@
 <head>
     <meta name="layout" content="main"/>
     <title>ArtisTech - Social Media Scraper</title>
-
-    <asset:link rel="icon" href="favicon.ico" type="image/x-ico" />
 </head>
 <body>
     <div id="content" role="main">
