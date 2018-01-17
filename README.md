@@ -36,3 +36,4 @@ Current support is provided through the `RestLinkController` and `RestTweetContr
 
  - Further or better support for REST
  - Domain expansion for future data (credibility of links, etc.)
+ - Hashtag extraction

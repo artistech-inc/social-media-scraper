@@ -146,83 +146,105 @@ class BootStrapService {
     }
 
     def loadFile(TweetCommand cmd) {
-        StopWatch sw = new StopWatch()
-        sw.start()
-        String fileName = cmd.tweetJsonFile.originalFilename.toLowerCase()
-
         String emailAddress = cmd.emailAddress
 
-        if(mailService != null) {
-            executorService.submit({
-                mailService.sendMail {
-                    to emailAddress
-                    subject "Import Start"
-                    body 'Import Start'
+        try {
+            StopWatch sw = new StopWatch()
+            sw.start()
+            String fileName = cmd.tweetJsonFile.originalFilename.toLowerCase()
+
+            if (fileName.endsWith(".json")) {
+                println "Reading: " + cmd.tweetJsonFile.originalFilename
+                def is = cmd.tweetJsonFile.inputStream
+                InputStreamReader sr = new InputStreamReader(is)
+
+                if (mailService != null) {
+                    executorService.submit({
+                        mailService.sendMail {
+                            to emailAddress
+                            subject "Import Start"
+                            body 'Import Start'
+                        }
+                    })
                 }
-            })
-        }
 
-        if(fileName.endsWith(".json")) {
-            println "Reading: " + cmd.tweetJsonFile.originalFilename
-            def is = cmd.tweetJsonFile.inputStream
-            InputStreamReader sr = new InputStreamReader(is)
-            String str = sr.readLine()
-            JsonSlurper slurper = new JsonSlurper();
-            while(str != null) {
-                def map = slurper.parseText(str)
-                loadTweet(map)
-                str = sr.readLine()
-            }
-
-            println "done reading input file!"
-        } else if (fileName.endsWith(".tar.gz")) {
-            def is = cmd.tweetJsonFile.inputStream
-            BufferedInputStream bin = new BufferedInputStream(is)
-            GzipCompressorInputStream gzIn = new GzipCompressorInputStream(bin)
-            TarArchiveInputStream tarIn = new TarArchiveInputStream(gzIn)
-
-            TarArchiveEntry entry = null;
-
-            /** Read the tar entries using the getNextEntry method **/
-
-            while ((entry = (TarArchiveEntry) tarIn.getNextEntry()) != null) {
-
-                println "Extracting: " + entry.getName()
-
-                /** If the entry is a directory, create the directory. **/
-
-                if (entry.isDirectory()) {
+                String str = sr.readLine()
+                JsonSlurper slurper = new JsonSlurper();
+                while (str != null) {
+                    def map = slurper.parseText(str)
+                    loadTweet(map)
+                    str = sr.readLine()
                 }
-                /**
-                 * If the entry is a file,write the decompressed file to the disk
-                 * and close destination stream.
-                 **/
-                else {
-                    int count;
-                    InputStreamReader sr = new InputStreamReader(tarIn)
-                    String str = sr.readLine()
-                    JsonSlurper slurper = new JsonSlurper();
-                    while(str != null) {
-                        def map = slurper.parseText(str)
-                        loadTweet(map)
-                        str = sr.readLine()
+
+                println "done reading input file!"
+            } else if (fileName.endsWith(".tar.gz")) {
+                def is = cmd.tweetJsonFile.inputStream
+                BufferedInputStream bin = new BufferedInputStream(is)
+
+                if (mailService != null) {
+                    executorService.submit({
+                        mailService.sendMail {
+                            to emailAddress
+                            subject "Import Start"
+                            body 'Import Start'
+                        }
+                    })
+                }
+
+                GzipCompressorInputStream gzIn = new GzipCompressorInputStream(bin)
+                TarArchiveInputStream tarIn = new TarArchiveInputStream(gzIn)
+
+                TarArchiveEntry entry = null;
+
+                /** Read the tar entries using the getNextEntry method **/
+
+                while ((entry = (TarArchiveEntry) tarIn.getNextEntry()) != null) {
+
+                    println "Extracting: " + entry.getName()
+
+                    /** If the entry is a directory, create the directory. **/
+
+                    if (entry.isDirectory()) {
+                    }
+                    /**
+                     * If the entry is a file,write the decompressed file to the disk
+                     * and close destination stream.
+                     **/
+                    else {
+                        int count;
+                        InputStreamReader sr = new InputStreamReader(tarIn)
+                        String str = sr.readLine()
+                        JsonSlurper slurper = new JsonSlurper();
+                        while (str != null) {
+                            def map = slurper.parseText(str)
+                            loadTweet(map)
+                            str = sr.readLine()
+                        }
                     }
                 }
+
+                /** Close the input stream **/
+
+                tarIn.close();
+                println "done reading input file!"
             }
-
-            /** Close the input stream **/
-
-            tarIn.close();
-            println "done reading input file!"
-        }
-
-        sw.stop()
-        if(mailService != null) {
+            sw.stop()
+            if(mailService != null) {
+                executorService.submit({
+                    sendMail {
+                        to emailAddress
+                        subject "Import Complete"
+                        body 'Import Complete: ' + sw.toString()
+                    }
+                })
+            }
+        } catch (FileNotFoundException fnfe) {
+            fnfe.printStackTrace()
             executorService.submit({
                 sendMail {
                     to emailAddress
-                    subject "Import Complete"
-                    body 'Import Complete: ' + sw.toString()
+                    subject fnfe.message
+                    body fnfe.toString()
                 }
             })
         }
