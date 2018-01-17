@@ -28,11 +28,16 @@ class Link {
         resolved nullable: true
     }
 
+    def beforeInsert() {
+    }
+
     def afterInsert() {
-        executorService.submit {
-            linkService.linkData(this)
-            this.save()
-        }
+        executorService.submit( {
+            Link.withNewSession {
+                linkService.linkData(this)
+                this.save()
+            }
+        })
         if(!this.tweet.links.find{ it.id == this.id }) {
             this.tweet.addToLinks(this)
             this.tweet.save()

@@ -71,6 +71,9 @@ class BootStrapService {
                     link.url = it["url"]
                     link.tweet = tweet
                     links.add(link)
+
+                    //comment out to custom resolve...
+                    //link.resolved = it["expanded_url"]
                 }
             }
         }
@@ -184,7 +187,7 @@ class BootStrapService {
                     while(str != null) {
                         def map = slurper.parseText(str)
                         loadTweet(map)
-                        println str
+//                        println str
                         str = sr.readLine()
                     }
                 }
