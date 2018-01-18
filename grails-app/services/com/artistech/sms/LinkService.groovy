@@ -12,6 +12,12 @@ class LinkService {
             String userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36"
             HttpURLConnection connection
 
+//            Link l = Link.findByUrl(link.url)
+//            if(l != null) {
+//                link.resolved = l.resolved
+//                link.contents = l.contents
+//            }
+
             //if the url has been specified as resloved, don't resolve again.
             if(link.resolved == null) {
                 connection = (HttpURLConnection) new URL(link.url).openConnection()
@@ -35,20 +41,24 @@ class LinkService {
                 connection.disconnect()
             }
 
-            //download data, spoof user-agent to gain access to all HTML
-            connection = (HttpURLConnection) new URL(link.resolved).openConnection()
-            connection.setRequestProperty("User-Agent", userAgent);
+            if(link.contents == null) {
+                //download data, spoof user-agent to gain access to all HTML
+                connection = (HttpURLConnection) new URL(link.resolved).openConnection()
+                connection.connectTimeout = 1000
+                connection.readTimeout = 1000
+                connection.setRequestProperty("User-Agent", userAgent);
 
-            //success
-            if (connection.responseCode >= 200 && connection.responseCode < 300) {
-                InputStream is = connection.inputStream
-                String contents = IOUtils.toString(is, "UTF-8")
-                is.close()
+                //success
+                if (connection.responseCode >= 200 && connection.responseCode < 300) {
+                    InputStream is = connection.inputStream
+                    String contents = IOUtils.toString(is, "UTF-8")
+                    is.close()
 
-                link.contents = contents
-                println "downloaded [" + link.id + "]: " + link.resolved + " (" + contents.length() + ")"
+                    link.contents = contents
+                    println "downloaded [" + link.id + "]: " + link.resolved + " (" + contents.length() + ")"
+                }
+                connection.disconnect()
             }
-            connection.disconnect()
         } catch (java.io.IOException ex) {
         } catch (java.io.FileNotFoundException ex) {
         } catch (java.net.MalformedURLException ex) {
