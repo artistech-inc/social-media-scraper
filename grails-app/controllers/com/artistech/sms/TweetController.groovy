@@ -12,9 +12,9 @@ class TweetController {
             redirect view: 'index'
             return
         }
-
+        cmd.userAgent = request.getHeader("User-Agent")
         if (cmd.hasErrors()) {
-            println cmd.errors
+            log.error "ERROR: ${cmd.errors}"
             respond(cmd.errors, view: 'create')
             return
         }

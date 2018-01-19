@@ -34,8 +34,7 @@ class Link {
     def afterInsert() {
         executorService.submit( {
             Link.withNewSession {
-                linkService.linkData(this)
-                this.save()
+                linkService.linkData(this).save()
             }
         })
         if(!this.tweet.links.find{ it.id == this.id }) {

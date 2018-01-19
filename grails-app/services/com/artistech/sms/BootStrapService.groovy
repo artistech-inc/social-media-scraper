@@ -5,6 +5,7 @@ import groovy.json.JsonSlurper
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
+import org.apache.commons.lang.exception.ExceptionUtils
 import org.grails.core.util.StopWatch
 
 import java.text.SimpleDateFormat
@@ -35,22 +36,15 @@ class BootStrapService {
                 try {
                     if (tweet.hasProperty(key)) {
                         tweet.setProperty(key, value)
-//                        println tweet.getProperty(key)
                     } else {
                         if (!key in ["coordinates", "entities"]) {
-                            println "Add Tweet Property: "
-                            println key
-                            println value
+                            log.debug "Add Tweet Property: ${key}: ${value}"
                         }
                     }
                 } catch (groovy.lang.MissingPropertyException ex) {
-                    println ex.message
-                    println key
-                    println value
+                    log.warn "${ex.message}: ${key}: ${value}", ex
                 } catch (org.codehaus.groovy.runtime.typehandling.GroovyCastException ex) {
-                    println ex.message
-                    println key
-                    println value
+                    log.warn "${ex.message}: ${key}: ${value}", ex
                 }
             } else if(key == "created_at") {
                 //Sun Feb 01 17:43:12 +0000 2009"
@@ -68,15 +62,22 @@ class BootStrapService {
             } else if (key == "metadata") {
                 //create metadata
             } else if (key == "entities") {
-                //load data into map
-                map[key]["urls"].each {
-                    Link link = new Link()
-                    link.url = it["url"]
-                    link.tweet = tweet
-                    links.add(link)
+                def entities = map[key]
+                def urls = entities["urls"]
+                Set<String> urlsSet = new HashSet<>()
+                if(urls != null) {
+                    urls.each {
+                        if(!urlsSet.contains(it["url"])) {
+                            urlsSet.add(it["url"])
 
-                    //comment out to custom resolve...
-                    //link.resolved = it["expanded_url"]
+                            Link l = new Link()
+                            l.url = it["url"]
+                            l.tweet = tweet
+                            links.add(l)
+                        }
+                    }
+//                } else {
+//                    log.warn "no urls specified: ${map}"
                 }
             }
         }
@@ -106,19 +107,13 @@ class BootStrapService {
                         user.setProperty(key, value)
                     } else {
                         if(!key in ["coordinates", "entities"]) {
-                            println "Add User Property: "
-                            println key
-                            println value
+                            log.debug "Add User Property: ${key}: ${value}"
                         }
                     }
                 } catch(groovy.lang.MissingPropertyException ex) {
-                    println ex.message
-                    println key
-                    println value
+                    log.warn "${ex.message}: ${key}: ${value}", ex
                 } catch(org.codehaus.groovy.runtime.typehandling.GroovyCastException ex) {
-                    println ex.message
-                    println key
-                    println value
+                    log.warn "${ex.message}: ${key}: ${value}", ex
                 }
             } else if(key == "created_at") {
                 //Thu Mar 20 18:34:23 +0000 2014"
@@ -140,7 +135,7 @@ class BootStrapService {
 
     def loadTweet(String tweet) {
         JsonSlurper slurper = new JsonSlurper();
-        println tweet
+        log.debug "Tweet: ${tweet}"
         def map = slurper.parseText(tweet)
         loadTweet(map)
     }
@@ -154,7 +149,7 @@ class BootStrapService {
             String fileName = cmd.tweetJsonFile.originalFilename.toLowerCase()
 
             if (fileName.endsWith(".json")) {
-                println "Reading: " + cmd.tweetJsonFile.originalFilename
+                log.debug "Reading ${cmd.tweetJsonFile.originalFilename}"
                 def is = cmd.tweetJsonFile.inputStream
                 InputStreamReader sr = new InputStreamReader(is)
 
@@ -176,7 +171,7 @@ class BootStrapService {
                     str = sr.readLine()
                 }
 
-                println "done reading input file!"
+                log.debug "done reading input file!"
             } else if (fileName.endsWith(".tar.gz")) {
                 def is = cmd.tweetJsonFile.inputStream
                 BufferedInputStream bin = new BufferedInputStream(is)
@@ -198,9 +193,9 @@ class BootStrapService {
 
                 /** Read the tar entries using the getNextEntry method **/
 
-                while ((entry = (TarArchiveEntry) tarIn.getNextEntry()) != null) {
+                while ((entry = (TarArchiveEntry) tarIn.nextEntry) != null) {
 
-                    println "Extracting: " + entry.getName()
+                    log.debug "Extracting: ${entry.name}"
 
                     /** If the entry is a directory, create the directory. **/
 
@@ -211,13 +206,12 @@ class BootStrapService {
                      * and close destination stream.
                      **/
                     else {
-                        int count;
                         InputStreamReader sr = new InputStreamReader(tarIn)
                         String str = sr.readLine()
                         JsonSlurper slurper = new JsonSlurper();
                         while (str != null) {
                             def map = slurper.parseText(str)
-                            loadTweet(map)
+                            Tweet tweet = loadTweet(map)
                             str = sr.readLine()
                         }
                     }
@@ -226,7 +220,7 @@ class BootStrapService {
                 /** Close the input stream **/
 
                 tarIn.close();
-                println "done reading input file!"
+                log.debug "done reading input file!"
             }
             sw.stop()
             if(mailService != null) {
@@ -239,12 +233,21 @@ class BootStrapService {
                 })
             }
         } catch (FileNotFoundException fnfe) {
-            fnfe.printStackTrace()
+            log.error "File Not Found: ${fnfe.message}", fnfe
             executorService.submit({
                 sendMail {
                     to emailAddress
                     subject fnfe.message
-                    body fnfe.toString()
+                    body ExceptionUtils.getStackTrace(fnfe)
+                }
+            })
+        } catch (Exception ex) {
+            log.error "Unexpected Exception: ${ex.message}", ex
+            executorService.submit({
+                sendMail {
+                    to emailAddress
+                    subject ex.message
+                    body ExceptionUtils.getStackTrace(ex)
                 }
             })
         }

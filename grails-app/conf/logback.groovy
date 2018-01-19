@@ -33,4 +33,7 @@ if (Environment.isDevelopmentMode() && targetDir != null) {
     }
     logger("StackTrace", ERROR, ['FULL_STACKTRACE'], false)
 }
-root(ERROR, ['STDOUT'])
+
+if (Environment.isDevelopmentMode()) {
+    logger 'com.artistech.sms', DEBUG, ['STDOUT']
+}
