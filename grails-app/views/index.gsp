@@ -12,7 +12,7 @@
             <p>Extract links from tweets, resolve shortened links, and then download the contents of the link.</p>
 
             <div id="controllers" role="navigation">
-                <h2>Available Controllers:</h2>
+                <h2>Select from the following data:</h2>
                 <ul>
                     <li><a href="${createLink(controller: "tweet")}">Tweets</a></li>
                     <li><a href="${createLink(controller: "link")}">Links</a></li>
