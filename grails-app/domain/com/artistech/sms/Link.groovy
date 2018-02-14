@@ -2,6 +2,7 @@ package com.artistech.sms
 
 class Link {
 
+    def executorService
     def linkService
 
     Tweet tweet
@@ -27,11 +28,15 @@ class Link {
         resolved nullable: true
     }
 
-    def beforeInsert(){
-        linkService.linkData(this)
+    def beforeInsert() {
     }
 
     def afterInsert() {
+        executorService.submit( {
+            Link.withNewSession {
+                linkService.linkData(this).save()
+            }
+        })
         if(!this.tweet.links.find{ it.id == this.id }) {
             this.tweet.addToLinks(this)
             this.tweet.save()

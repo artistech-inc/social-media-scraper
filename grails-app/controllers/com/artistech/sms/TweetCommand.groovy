@@ -5,8 +5,12 @@ import org.springframework.web.multipart.MultipartFile
 
 class TweetCommand implements Validateable {
     MultipartFile tweetJsonFile
+    String emailAddress
+    String userAgent
 
     static constraints = {
+        userAgent nullable: true
+        emailAddress nullable: false
         tweetJsonFile  validator: { val, obj ->
             if ( val == null ) {
                 return false

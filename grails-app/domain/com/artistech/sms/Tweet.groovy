@@ -70,15 +70,16 @@ class Tweet {
     }
 
     def afterInsert(){
-        if(this.retweeted_status == null) {
-            println "inserted original: " + this.id
-            final Tweet tw = this
-            executorService.submit( {
-                Link.withNewSession {
-                    tweetService.linkExtractor(tw)
-                }
-            })
-        }
+        //rely on pull out links directly from the tweet data sets
+//        if(this.retweeted_status == null) {
+//            println "inserted original: " + this.id
+//            final Tweet tw = this
+//            executorService.submit( {
+//                Link.withNewSession {
+//                    tweetService.linkExtractor(tw)
+//                }
+//            })
+//        }
 
         if(!this.user.tweets.find{ it.id == this.id }) {
             this.user.addToTweets(this)
