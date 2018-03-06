@@ -22,29 +22,27 @@
             <g:if test="${flash.message}">
                 <div class="message" role="status">${flash.message}</div>
             </g:if>
-            <h1>
                 <%--
-                <g:form controller="Tweet">
-                    <g:actionSubmit value="Show only original Tweets" action="showOriginalTweetList"/>
-                </g:form>
-                    class="create"
-
-                --%>
+            <h1>
+                
                 <div class="buttons">
 
                     <g:link class="save" params="[sort: 'original', order: 'asc']"
                         controller="tweet" action="index">Show only original Tweets</g:link>
                     </div> 
                 </h1>
+--%>
+            <%--
                 Total: ${tweetCount}<br>
-            Parameters: ${params}
+                Parameters: ${params}
+            --%>
             <table>
                 <tr background:#f7f7f7> 
                     <td width:50% background:#f7f7f7>
                         <g:form controller="Tweet">
                         <p>Refine By </p>
                         <br>
-                        <g:checkBox name="sortOriginal" /> Original Only <br>
+                        <g:checkBox name="original" /> Original Only <br>
                         <g:checkBox name="hasLinks" disabled="true" /> Has Links <br>
                         <g:checkBox name="hasHashtags" disabled="true"/> Has Hashtags <br>
                         <g:checkBox name="hasImages" disabled="true"/> Has Images <br>
@@ -56,10 +54,11 @@
                             noSelection="['':'-Choose-']"
                              />
                         <br> <br>
-                        <p>Sort By </p>
+                        <p>Sort By 
+                        </p>
                         
-                        <g:checkBox name="sortNumLinks" /> # of Links (popularity) <br>
-                        <g:checkBox name="sortCredibility" /> Credibility <br>
+                        <g:checkBox name="sortNumRetweets" /> # of Retweets (Popularity) <br>
+                        <g:checkBox name="sortCredibility" disabled="true" /> Credibility <br>
                         <br>
                         <g:actionSubmit action="index" value="Update View" />
                         </g:form>
