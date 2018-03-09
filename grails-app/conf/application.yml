@@ -125,7 +125,8 @@ environments:
             dialect: org.hibernate.dialect.MySQL5InnoDBDialect
             username: sms
             password: 'sms'
-            url: jdbc:mysql://lespaul:3306/smsProd?autoReconnect=true&useSSL=false
+            #url: jdbc:mysql://lespaul:3306/smsProd?autoReconnect=true&useSSL=false
+            url: jdbc:mysql://localhost:3306/smsProd?autoReconnect=true&useSSL=false
             properties:
                 jmxEnabled: true
                 initialSize: 5
