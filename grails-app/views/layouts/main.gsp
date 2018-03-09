@@ -27,7 +27,7 @@
                 <a class="navbar-brand" href="/#">
                     <i class="fa grails-icon">
                         <asset:image src="favicon.png"/>
-                    </i> Social Media Scraper
+                    </i> Persistent Open Source Event Dataset (POSED)
                 </a>
             </div>
             <div class="navbar-collapse collapse" aria-expanded="false" style="height: 0.8px;">
