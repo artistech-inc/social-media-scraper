@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta name="layout" content="main"/>
-    <title>ArtisTech - Social Media Scraper</title>
+    <title>ArtisTech - POSED</title>
 </head>
 <body>
     <div id="content" role="main">
