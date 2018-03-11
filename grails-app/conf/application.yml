@@ -120,12 +120,16 @@ dataSource:
 environments:
     development:
         dataSource:
-            dbCreate: create-drop
+            #dbCreate: create-drop
+            dbCreate: update
             driverClassName: com.mysql.cj.jdbc.Driver
             dialect: org.hibernate.dialect.MySQL5InnoDBDialect
             username: sms
-            password: 'sms'
-            url: jdbc:mysql://lespaul:3306/smsProd?autoReconnect=true&useSSL=false
+            #for my dev machine
+            password: 'smspwd'
+            #password: 'sms'
+            url: jdbc:mysql://localhost:3306/smsDev?autoReconnect=true&useSSL=false
+            #url: jdbc:mysql://lespaul:3306/smsDev?autoReconnect=true&useSSL=false
             properties:
                 jmxEnabled: true
                 initialSize: 5
@@ -155,6 +159,7 @@ environments:
             dialect: org.hibernate.dialect.MySQL5InnoDBDialect
             username: sms
             password: 'sms'
+            # localhost will be the database on the production machine
             url: jdbc:mysql://localhost:3306/smsDev?autoReconnect=true&useSSL=false
             properties:
                 jmxEnabled: true
