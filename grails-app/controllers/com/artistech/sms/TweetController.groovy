@@ -145,35 +145,28 @@ class TweetController {
         tweetsToShow = resultMap.tweetList
         log.debug "in index, from queryForTweets: count: ${tweetCount}, size of tweet list: ${tweetsToShow.size()}"
 
-        /*
-        if (params.original == "on") {
-            // filter the tweets for original only
-            log.debug "Filter on original tweets only"
-            // need to get a subset of the results based on what result page is to be viewed,
-            // to allow paging through results
-           if (params.languageSelect != null) {
-                log.debug "language selected: ${params.languageSelect}"
-                selLang = params.languageSelect
-            }
-            
-            tweetsToShow = tweetService.queryForOriginalTweets(sortOrder, sortType, offset, max, selLang)
-            tweetCount = tweetsToShow.size()
-            
-            // testing
-            //def sampleQuery = tweetService.queryForOriginalTweets("DESC", "", 4, 3)
-            
-        } else {
-            log.debug "No filter, returning all tweets"
-            // otherwise return all the tweets, really a subset of the tweets 
-            // depending on what page of results has been requested
-            tweetsToShow = Tweet.list(offset: offset, max: max)
-            tweetCount = Tweet.count()
-        }
-        */
         def langList = tweetService.queryForUniqueLanguages()
        
        // [tweetList: Tweet.list(offset: offset, max: max), tweetCount: Tweet.count()]
-       [tweetList: tweetsToShow, tweetCount: tweetCount, languages: langList]
+       // if sortType is Date, then this is the default and the user didn't select
+       // anything to sort by, so set this to null
+       def String sortNumRetweets = null
+       // future use
+       def String sortCredibility = null
+       log.debug "sortType: ${sortType}"
+       if (sortType.equals("DATE")) {
+           sortNumRetweets = null
+           sortCredibility = null
+       } else if (sortType.equals("POPULARITY")) {
+           sortNumRetweets = "on"
+           sortCredibility = null
+       } else {
+           sortNumRetweets = null
+           sortCredibility = "on"          
+       }
+       log.debug "sortNumRetweets: ${sortNumRetweets}"
+       [tweetList: tweetsToShow, tweetCount: tweetCount, languages: langList, 
+            origTweet: originalTweet, selectedLang: selLang, sortNumRetweets: sortNumRetweets]
     }
     
     

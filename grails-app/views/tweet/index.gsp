@@ -31,18 +31,19 @@
                         controller="tweet" action="index">Show only original Tweets</g:link>
                     </div> 
                 </h1>
---%>
-            <%--
+                --%>
                 Total: ${tweetCount}<br>
+            <%--
                 Parameters: ${params}
             --%>
+
             <table>
                 <tr background:#f7f7f7> 
                     <td width:50% background:#f7f7f7>
                         <g:form controller="Tweet">
                         <p>Refine By </p>
                         <br>
-                        <g:checkBox name="original" /> Original Only <br>
+                        <g:checkBox name="original" value="${origTweet}" /> Original Only <br>
                         <g:checkBox name="hasLinks" disabled="true" /> Has Links <br>
                         <g:checkBox name="hasHashtags" disabled="true"/> Has Hashtags <br>
                         <g:checkBox name="hasImages" disabled="true"/> Has Images <br>
@@ -51,13 +52,14 @@
                         <p>Language</p>
                         <g:select name="languageSelect"
                             from="${languages}"
+                            value="${selectedLang}"
                             noSelection="['':'-Choose-']"
                              />
                         <br> <br>
                         <p>Sort By 
                         </p>
                         
-                        <g:checkBox name="sortNumRetweets" /> # of Retweets (Popularity) <br>
+                        <g:checkBox name="sortNumRetweets" value="${sortNumRetweets}"/> # of Retweets (Popularity) <br>
                         <g:checkBox name="sortCredibility" disabled="true" /> Credibility <br>
                         <br>
                         <g:actionSubmit action="index" value="Update View" />
