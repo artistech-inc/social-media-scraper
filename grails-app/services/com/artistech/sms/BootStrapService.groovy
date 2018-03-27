@@ -170,7 +170,22 @@ class BootStrapService {
     }
 
     /**
-    * Called from -- 
+    * Called from -- TweetController.Upload
+    * Save the uploaded file in a temporary location for processing later.
+    **/
+    def saveFile(TweetCommand cmd) {   
+        // see how long it takes to save the file
+        StopWatch sw = new StopWatch()
+        sw.start()
+        
+        String fileName = cmd.tweetJsonFile.originalFilename.toLowerCase()  
+        log.debug "Saving file ${fileName} at " + sw.toString()
+        
+    } 
+    
+    /**
+    * Called from -- TweetController.Upload
+    * 
     **/
     def loadFile(TweetCommand cmd) {
         String emailAddress = cmd.emailAddress
@@ -182,7 +197,7 @@ class BootStrapService {
 
             if (fileName.endsWith(".json")) {
                 log.debug "Reading ${cmd.tweetJsonFile.originalFilename}"
-                def is = cmd.tweetJsonFile.inputStream
+                def is = cmd.tweetJsonFile.getInputStream()
                 InputStreamReader sr = new InputStreamReader(is)
 
                 if (mailService != null) {
@@ -205,7 +220,8 @@ class BootStrapService {
 
                 log.debug "done reading input file!"
             } else if (fileName.endsWith(".tar.gz")) {
-                def is = cmd.tweetJsonFile.inputStream
+                def is = cmd.tweetJsonFile.getInputStream()
+                
                 BufferedInputStream bin = new BufferedInputStream(is)
 
                 if (mailService != null) {
@@ -217,7 +233,6 @@ class BootStrapService {
                         }
                     })
                 }
-
                 GzipCompressorInputStream gzIn = new GzipCompressorInputStream(bin)
                 TarArchiveInputStream tarIn = new TarArchiveInputStream(gzIn)
 
@@ -229,7 +244,7 @@ class BootStrapService {
 
                     log.debug "Extracting: ${entry.name}"
 
-                    /** If the entry is a directory, create the directory. **/
+                    /** If the entry is a directory, skip **/
 
                     if (entry.isDirectory()) {
                     }
