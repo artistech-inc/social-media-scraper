@@ -111,8 +111,9 @@ dataSource:
     username: sa
     password: ''
 
-# GRANT ALL PRIVILEGES ON *.* TO 'sms'@'%' IDENTIFIED BY 'sms';
-# Requires also changing the mysql cnf file
+# CREATE USER 'sms'@'%' IDENTIFIED BY 'smspwd';
+# GRANT ALL PRIVILEGES ON *.* TO 'sms'@'%' IDENTIFIED BY 'smspwd';
+# Requires also changing the mysql cnf file -- my.ini
 #[mysqld]
 #character-set-server=utf8mb4
 #collation-server=utf8mb4_general_ci
