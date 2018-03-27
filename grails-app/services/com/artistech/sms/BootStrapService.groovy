@@ -24,8 +24,12 @@ class BootStrapService {
         }
         Tweet tweet = new Tweet()
         def links = []
+        // hash of urls that were found in the text and in the entities tag;
+        // should only store 1 link
+        Set<String> urlsSet = new HashSet<>()
 
         tweet.contents = map["text"]
+        log.debug "new tweet: ${map["id"]}, contents: ${tweet.contents}"
         map.each { key, value ->
             if (key != "id" &&
                     key != "user" &&
@@ -64,7 +68,10 @@ class BootStrapService {
             } else if (key == "entities") {
                 def entities = map[key]
                 def urls = entities["urls"]
-                Set<String> urlsSet = new HashSet<>()
+                log.debug "tweet with entities ${map["id"]}, entities field: ${entities}"
+                log.debug "     content: ${map["text"]}"
+                log.debug "     urls: " + urls
+                //Set<String> urlsSet = new HashSet<>()
                 if(urls != null) {
                     urls.each {
                         if(!urlsSet.contains(it["url"])) {
@@ -76,11 +83,33 @@ class BootStrapService {
                             links.add(l)
                         }
                     }
-//                } else {
-//                    log.warn "no urls specified: ${map}"
+                } else {
+                    log.debug "***** no urls specified in entities tag, checking text later"
                 }
             }
         }
+        // check to see if links were found; if not, check the text
+        // just in case there are links but no entities field in the tweet
+        if (links.size() == 0) {
+            log.debug "NO LINKS, checking text, ${tweet.contents}"
+            // Parser is found in com.artistech.sms
+            Parser p = new Parser()
+            def parsedUrls = p.parse(tweet.contents)
+            
+            parsedUrls.each {
+                log.debug "     Found URL in text: ${it}"
+                if(!urlsSet.contains(it)) {
+                    log.debug "       adding url to set"
+                    urlsSet.add(it)
+                    Link textLink = new Link()
+                    textLink.url = it
+                    textLink.tweet = tweet
+                    links.add(textLink)
+                }
+                
+            }          
+        }
+        log.debug "Found ${links.size()} links in the tweet"
         tweet.save(failOnError: true, flush: true)
         links.each {
             it.save(failOnError: true, flush: true)
@@ -140,6 +169,24 @@ class BootStrapService {
         loadTweet(map)
     }
 
+    /**
+    * Called from -- TweetController.Upload
+    * Save the uploaded file in a temporary location for processing later.
+    **/
+    def saveFile(TweetCommand cmd) {   
+        // see how long it takes to save the file
+        StopWatch sw = new StopWatch()
+        sw.start()
+        
+        String fileName = cmd.tweetJsonFile.originalFilename.toLowerCase()  
+        log.debug "Saving file ${fileName} at " + sw.toString()
+        
+    } 
+    
+    /**
+    * Called from -- TweetController.Upload
+    * 
+    **/
     def loadFile(TweetCommand cmd) {
         String emailAddress = cmd.emailAddress
 
@@ -150,7 +197,7 @@ class BootStrapService {
 
             if (fileName.endsWith(".json")) {
                 log.debug "Reading ${cmd.tweetJsonFile.originalFilename}"
-                def is = cmd.tweetJsonFile.inputStream
+                def is = cmd.tweetJsonFile.getInputStream()
                 InputStreamReader sr = new InputStreamReader(is)
 
                 if (mailService != null) {
@@ -173,7 +220,8 @@ class BootStrapService {
 
                 log.debug "done reading input file!"
             } else if (fileName.endsWith(".tar.gz")) {
-                def is = cmd.tweetJsonFile.inputStream
+                def is = cmd.tweetJsonFile.getInputStream()
+                
                 BufferedInputStream bin = new BufferedInputStream(is)
 
                 if (mailService != null) {
@@ -185,7 +233,6 @@ class BootStrapService {
                         }
                     })
                 }
-
                 GzipCompressorInputStream gzIn = new GzipCompressorInputStream(bin)
                 TarArchiveInputStream tarIn = new TarArchiveInputStream(gzIn)
 
@@ -197,22 +244,25 @@ class BootStrapService {
 
                     log.debug "Extracting: ${entry.name}"
 
-                    /** If the entry is a directory, create the directory. **/
+                    /** If the entry is a directory, skip **/
 
                     if (entry.isDirectory()) {
                     }
                     /**
-                     * If the entry is a file,write the decompressed file to the disk
-                     * and close destination stream.
+                     * If the entry is a file, read each line and load the tweet
                      **/
                     else {
                         InputStreamReader sr = new InputStreamReader(tarIn)
                         String str = sr.readLine()
                         JsonSlurper slurper = new JsonSlurper();
-                        while (str != null) {
+                        int count = 0;
+                        // for testing, only load subset
+                        //while (str != null && count < 200) {
+                        while (str != null) {    
                             def map = slurper.parseText(str)
                             Tweet tweet = loadTweet(map)
                             str = sr.readLine()
+                            count++;
                         }
                     }
                 }

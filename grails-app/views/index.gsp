@@ -2,12 +2,12 @@
 <html>
 <head>
     <meta name="layout" content="main"/>
-    <title>ArtisTech - Social Media Scraper</title>
+    <title>ArtisTech - POSED</title>
 </head>
 <body>
     <div id="content" role="main">
         <section class="row colset-2-its">
-            <h1>Social Media Scraper</h1>
+            <h1>Persistent Open Source Event Dataset</h1>
 
             <p>Extract links from tweets, resolve shortened links, and then download the contents of the link.</p>
 
