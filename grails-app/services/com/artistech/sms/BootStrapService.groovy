@@ -288,8 +288,8 @@ class BootStrapService {
                         JsonSlurper slurper = new JsonSlurper();
                         int count = 0;
                         // for testing, only load subset
-                        while (str != null && count < 250) {
-                        //while (str != null) {    
+                        //while (str != null && count < 250) {
+                        while (str != null) {    
                             def map = slurper.parseText(str)
                             Tweet tweet = loadTweet(map)
                             str = sr.readLine()
