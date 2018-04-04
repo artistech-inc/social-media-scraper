@@ -8,6 +8,11 @@ class TweetController {
 
     static scaffold = Tweet
 
+    /**
+     * Save the uploaded file to a temporary location, then process it in a separate thread.
+     * Note: multiple exit points from this method depending on errors found.
+     *
+     */
     def upload(TweetCommand cmd) {
         if (cmd == null) {
             redirect view: 'index'
@@ -15,16 +20,38 @@ class TweetController {
         }
         cmd.userAgent = request.getHeader("User-Agent")
         if (cmd.hasErrors()) {
+            // from the user not entering an email address and/or file to upload
             log.error "ERROR: ${cmd.errors}"
+            log.debug "cmd has errors in upload"
+            flash.error = "Enter an email address and file to upload (.json or .tar.gz)."
             respond(cmd.errors, view: 'create')
             return
         }
+        def origFileName = cmd.tweetJsonFile.getOriginalFilename()
+        
+        // Save file to temporary location first, then process it
+        def resultMap = bootStrapService.saveFile(cmd)
+        
+        File tempFile = resultMap.uploadedFile
+        String tempFilePath = resultMap.fileWithPath
 
-        executorService.submit {
-            bootStrapService.loadFile(cmd)
+        if (tempFile != null) {
+            // new thread for processing file
+            log.debug "Starting new thread for processing tweets."
+            executorService.submit {
+                bootStrapService.loadFile(tempFile, cmd.emailAddress)
+            }             
+            flash.message = "Processing your file: ${tempFilePath}."
+
+        } else {
+            // report to user that there was an upload problem
+            log.debug "No file returned from saveFile"
+            flash.error = "Error uploading ${tempFilePath} -- Check your file and try again."
+            redirect(action: "create")
+            return
         }
-
         redirect action: "index"
+       
     }
 
     /**
