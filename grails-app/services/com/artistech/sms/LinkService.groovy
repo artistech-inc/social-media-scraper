@@ -2,6 +2,7 @@ package com.artistech.sms
 
 import grails.gorm.transactions.Transactional
 import org.apache.commons.io.IOUtils
+import grails.plugins.rest.client.RestBuilder
 
 @Transactional
 class LinkService {
@@ -39,6 +40,19 @@ class LinkService {
                 link.resolved = location
                 connection.disconnect()
                 log.debug "resolved [${link.id}]: ${link.url} to ${link.resolved}"
+                try {
+                    RestBuilder rest = new RestBuilder()
+                    def body_str = 'url=' + link.resolved
+                    log.warn body_str.toString()
+                    def resp = rest.post('http://localhost:5000/new-tweet-link') {
+                        contentType "application/x-www-form-urlencoded"
+                        body body_str.toString()
+                    }
+                    log.warn resp.text.toString()
+                } catch(Exception e) {
+                    log.warn "got rest error"
+                    log.warn e.getMessage()
+                }
             }
 
             if(link.contents == null) {

@@ -71,20 +71,6 @@ class BootStrapService {
                         if(!urlsSet.contains(it["url"])) {
                             urlsSet.add(it["url"])
 
-                            try {
-                                RestBuilder rest = new RestBuilder()
-                                def body_str = 'url=' + it["url"].toString()
-                                log.warn body_str.toString()
-                                def resp = rest.post('http://localhost:5000/new-tweet-link') {
-                                    contentType "application/x-www-form-urlencoded"
-                                    body body_str.toString()
-                                }
-                                log.warn resp.text.toString()
-                            } catch(Exception e) {
-                                log.warn "got rest error"
-                                log.warn e.getMessage()
-                            }
-
                             Link l = new Link()
                             l.url = it["url"]
                             l.tweet = tweet
