@@ -6,29 +6,61 @@ import org.apache.commons.lang.exception.ExceptionUtils
 import org.grails.core.util.StopWatch
 import grails.plugins.rest.client.RestBuilder
 
+
 @Transactional
 class TweetCredService {
 
+    static Integer base_id = 1
     def executorService
 
     def loadTweet(Map map) {
-        String id_str = map["id_str"]
-        TweetCred tc = new TweetCred()
+        log.warn "loading tweet map"
+        if (map == null) {
+            log.warn "map is null"
+        }
+        //String id_str = map["id_str"]
+        //log.warn "got id_str ${id_str}"
+        String id_str = base_id.toString()
+        base_id += 1
+        def m1 = map["urls"]
+        String url = m1["url"]
+        //String content = m1["text"]
+        String reliability_score = Float.parseFloat((m1[0]["classifiers"][0]["result"][1][1]).toString())
+        String bias_score = Float.parseFloat((m1[0]["classifiers"][1]["result"][1][1]).toString())
+        String subjectivity_title_score = Float.parseFloat((m1[0]["classifiers"][2]["result"][0]).toString())
+        String subjectivity_body_score = Float.parseFloat((m1[0]["classifiers"][2]["result"][1]).toString())
+        log.warn "got url ${url}"
+        log.warn "got rel score ${reliability_score}"
+        log.warn "got bias score ${bias_score}"
+        log.warn "got subj title ${subjectivity_title_score}"
+        log.warn "got subj body ${subjectivity_body_score}"
+        TweetCred tc = new TweetCred(
+            url: url,
+            id_str: id_str,
+            reliable_style: reliability_score,
+            biased_style: bias_score,
+            subjectivity_title: subjectivity_title_score,
+            subjectivity_body: subjectivity_body_score)
         tc.save(failOnError: true, flush: true)
         return tc
     }
 
     def loadTweet(String cred) {
+        log.warn "starting cred"
         JsonSlurper slurper = new JsonSlurper();
         log.debug "Cred: ${cred}"
+        def map = null
         try{ 
-            def map = slurper.parseText(cred)
+            log.warn "trying to slurp"
+            map = slurper.parseText(cred)
             log.warn map.toString()
+            log.warn "tried to get map"
         } catch (Exception e) {
             log.error "error parsing Cred JSON"
             log.error e.getMessage()
         }
-        //loadTweet(map)
+        log.warn "about to load tweet map"
+        loadTweet(map)
     }
 
 }
