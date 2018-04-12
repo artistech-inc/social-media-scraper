@@ -16,6 +16,10 @@
                 --%>
             </ul>
         </div>
+        <g:if test="${flash.error}">
+            <div class="errors" >${flash.error}</div>
+        </g:if>
+
         <g:uploadForm name="upload" action="upload" style="display:inline;" enctype="multipart/form-data">
             <fieldset class="form">
                 E-mail address is only to notify when the dataset has been completely imported.  E-mail records are not retained.
@@ -24,7 +28,7 @@
                         <td width="150px" align="right"><label for="emailAddress">E-Mail Address (gmail): </label></td><td><span class='required-indicator' style='float:left'>*</span><input id="emailAddress" type="email" name="emailAddress" /></td>
                     </tr>
                     <tr>
-                        <td width="150px" align="right"><label for="tweetJsonFile">Tweet Dataset: </label></td><td><span class='required-indicator' style='float:left'>*</span><input id="tweetJsonFile" type="file" name="tweetJsonFile"/></td>
+                        <td width="150px" align="right"><label for="tweetJsonFile">Tweet Dataset (.json or .tar.gz): </label></td><td><span class='required-indicator' style='float:left'>*</span><input id="tweetJsonFile" type="file" name="tweetJsonFile"/></td>
                     </tr>
                 </table>
             </fieldset>
