@@ -6,6 +6,7 @@ class TweetCred {
 
     String url
     String id_str
+    String contents
     Float reliable_style
     Float biased_style
     Float subjectivity_title
@@ -17,6 +18,7 @@ class TweetCred {
 
     static mapping = {
         url type: 'text'
+        contents type: 'text'
         reliable_style type: 'float'
         biased_style type: 'float'
         subjectivity_title type: 'float'
