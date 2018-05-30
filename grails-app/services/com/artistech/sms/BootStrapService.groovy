@@ -90,7 +90,7 @@ class BootStrapService {
         }
         // check to see if links were found; if not, check the text
         // just in case there are links but no entities field in the tweet
-        if (links.size() == 0) {
+        if (links.size() == 0 && tweet.contents != null) {
             log.debug "NO LINKS, checking text, ${tweet.contents}"
             // Parser is found in com.artistech.sms
             Parser p = new Parser()
@@ -212,15 +212,39 @@ class BootStrapService {
     } 
     
     /**
+     *  Send email with status. 
+     * 
+     **/
+    def sendEmail (String emailAddress, String msgSubject, String msgBody) {
+        if (mailService != null) {
+            executorService.submit({
+                mailService.sendMail {
+                    to emailAddress
+                    subject msgSubject
+                    body msgBody
+                }
+            })
+        }       
+        
+    }
+    
+    /**
     * Called from -- TweetController.Upload
     * In a separate thread for processing.
     * Loads the temporary file, processes, then deletes it.
     * The file will end in .json or .tar.gz.
     * Sends an email upon starting and finishing the processing.
+    * Does a few checks for a valid tweet file before processing, in case a tweet
+    * ends in a NL after each element, in which case it can't be parsed.
+    * Future -- remove the NLs from the file, then process. 
     * 
     **/
     def loadFile(File tempUploadFile, String emailAddress) {
-         try {
+        // define the message string here so the catch block has access to
+        // it for reporting the error
+        String str = ""
+ 
+        try {
             log.debug "loadFile..."
 
             StopWatch sw = new StopWatch()
@@ -228,26 +252,33 @@ class BootStrapService {
             String fileName = tempUploadFile.getAbsolutePath().toLowerCase()
             log.debug "path: ${fileName}"
             InputStream fileStream = new FileInputStream(tempUploadFile)
+            def theDate = new Date()
             log.debug "have a new inputstream"
           
+            boolean parseError = false
+            
             if (fileName.endsWith(".json")) {
                 log.debug "Reading ${fileName}"
                 InputStreamReader sr = new InputStreamReader(fileStream)
-
-                if (mailService != null) {
-                    executorService.submit({
-                        mailService.sendMail {
-                            to emailAddress
-                            subject "Import Start ${fileName}"
-                            body 'Import Start'
-                        }
-                    })
-                }
-                String str = sr.readLine()
+                // send email notifying that import is starting
+                log.debug "calling sendEmail..."
+                sendEmail(emailAddress, "Import Starting for ${fileName}",
+                                        "Import started on " + theDate.format("EEE, d MMM yyyy HH:mm:ss"))
+            
+                
+                str = sr.readLine()
                 JsonSlurper slurper = new JsonSlurper();
-                while (str != null) {
+                while (str != null && !parseError) {
                     def map = slurper.parseText(str)
-                    loadTweet(map)
+                    // make sure there is a parsed json file and a tweet id
+                    if (map.size() > 0 && map["id_str"]) {
+                        loadTweet(map)
+                    } else {
+                        log.debug "Error parsing JSON format: ${str}"
+                        parseError = true
+                        sendEmail(emailAddress, "Error parsing tweet in ${fileName}", 
+                                                "Error parsing tweet: ${str}")
+                    } 
                     str = sr.readLine()
                 }
                 sr.close()
@@ -255,15 +286,10 @@ class BootStrapService {
                 
             } else if (fileName.endsWith(".tar.gz")) {
                 BufferedInputStream bin = new BufferedInputStream(fileStream)
-                if (mailService != null) {
-                    executorService.submit({
-                        mailService.sendMail {
-                            to emailAddress
-                            subject "Import Start ${fileName}"
-                            body 'Import Start'
-                        }
-                    })
-                }
+                log.debug "calling sendEmail, loading tar.gz..."
+                sendEmail(emailAddress, "Import Starting for ${fileName}",
+                                        "Import started on " + theDate.format("EEE, d MMM yyyy HH:mm:ss"))
+
                 GzipCompressorInputStream gzIn = new GzipCompressorInputStream(bin)
                 TarArchiveInputStream tarIn = new TarArchiveInputStream(gzIn)
 
@@ -284,16 +310,26 @@ class BootStrapService {
                      **/
                     else {
                         InputStreamReader sr = new InputStreamReader(tarIn)
-                        String str = sr.readLine()
+                        str = sr.readLine()
                         JsonSlurper slurper = new JsonSlurper();
                         int count = 0;
                         // for testing, only load subset
-                        //while (str != null && count < 250) {
-                        while (str != null) {    
+                        //while (str != null && !parseError && count < 150) {
+                        while (str != null && !parseError) {    
                             def map = slurper.parseText(str)
-                            Tweet tweet = loadTweet(map)
-                            str = sr.readLine()
-                            count++;
+                            // make sure there is a parsed json file and a tweet id
+                            log.debug "Checking tweet map for id_str"
+                            if (map.size() > 0 && map["id_str"]) {
+                                Tweet tweet = loadTweet(map)
+                                str = sr.readLine()
+                                count++;
+                            } else {
+                                log.debug "Error parsing JSON format: ${str}"
+                                parseError = true
+                                sendEmail(emailAddress, "Error parsing tweet in ${fileName}", 
+                                                        "Error parsing tweet: ${str}")
+                                
+                            }
                         }
                     }
                 }
@@ -305,44 +341,37 @@ class BootStrapService {
                 
             }
             sw.stop()
-            if(mailService != null) {
-                executorService.submit({
-                    sendMail {
-                        to emailAddress
-                        subject "Import Complete ${fileName}"
-                        body 'Import Complete: ' + sw.toString()
-                    }
-                })
-            }            
+            // send a completion email only if there was no parse error
+            if (!parseError) {
+                sendEmail(emailAddress, "Import Complete for ${fileName}",
+                                        "Import completed on " + theDate.format("EEE, d MMM yyyy HH:mm:ss") +
+                                        ", ${sw.toString()}")
+            }
             // delete temporary file 
             tempUploadFile.delete()
          
         } catch (FileNotFoundException fnfe) {
             log.error "File Not Found: ${fnfe.message}", fnfe
             log.debug "File Not Found: ${fnfe.message}"
-            executorService.submit({
-                sendMail {
-                    to emailAddress
-                    subject fnfe.message + ": ${fileName}"
-                    body ExceptionUtils.getStackTrace(fnfe)
-                }
-            })
+
+            sendEmail(emailAddress, fnfe.message + ": ${fileName}",
+                                    ExceptionUtils.getStackTrace(fnfe))
+ 
+            
         } catch (Exception ex) {
             log.error "Unexpected Exception: ${ex.message}", ex
-            log.debug "Unexpected Exception: ${ex.message}"
-            executorService.submit({
-                sendMail {
-                    to emailAddress
-                    subject ex.message + ": ${fileName}"
-                    body ExceptionUtils.getStackTrace(ex)
-                }
-            })
+            log.debug "Unexpected Exception: ${ex.message}, tweet string: ${str}"
+            sendEmail(emailAddress, ex.message + ": ${fileName}",
+                                    "Tweet with the problem: ${str}, Stack trace: " + 
+                                    ExceptionUtils.getStackTrace(ex))
+
         }                        
         
     }
     
     /**
     * Called from -- TweetController.Upload
+    * **** Deprecated -- calling loadFile with a temporary upload file instead
     * 
     **/
     def loadFile(TweetCommand cmd) {
